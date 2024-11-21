@@ -7,6 +7,8 @@ const router = express.Router()
 // display all users
 router.route('/')
     .get(verifyJWT, userController.getAll)
+
+  router.route('/me')
     .get(verifyJWT, userController.me)
 
 // view any user by id
