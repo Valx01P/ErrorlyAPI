@@ -7,6 +7,7 @@ const router = express.Router()
 // display all users
 router.route('/')
     .get(verifyJWT, userController.getAll)
+    .get(verifyJWT, userController.me)
 
 // view any user by id
 // update your own user

@@ -4,6 +4,27 @@ import verifyOwnership from '../utils/verifyOwnership.js'
 const User = new PostgresService('users')
 
 const userController = {
+  async me(req, res) {
+    try {
+      const user_id = req.jwt_user.userId
+      const user = await User.get_by_id(user_id)
+      const formattedUser = {
+        id: user.id,
+        user_name: user.user_name,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        image_url: user.image_url,
+        created_at: user.created_at
+      }
+      return res.status(200).json({
+        formattedUser
+      })
+    } catch (error) {
+      return res.status(500).json({
+        message: 'Internal server error while retrieving users'
+      })
+    }
+  },
   async getAll(req, res) {
     try {
 
