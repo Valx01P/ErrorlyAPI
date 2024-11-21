@@ -41,47 +41,90 @@ const postsController = {
             })
         }
     },
-
     async createPost(req, res) {
-        try {
-            const user_id = req.jwt_user.userId
-            const post_data = { ...req.body.post, user_id: user_id }
-            const post = await Post.save(post_data)
+      try {
+          const user_id = req.jwt_user.userId;
+          const post_data = { ...req.body.post, user_id: user_id };
+          
+          // Validate that title and content are provided
+          if (!post_data.title || !post_data.content) {
+              return res.status(400).json({ message: 'Title and content are required' });
+          }
+  
+          const post = await Post.save(post_data);
+          let postTags = [];
+  
+          if (Array.isArray(req.body.tags) && req.body.tags.length > 0) {
+              const tags = await Tags.get_all();
+  
+              for (const tag of req.body.tags) {
+                  let existing_tag = tags.find(t => t.name.toLowerCase() === tag.toLowerCase());
+                  if (existing_tag) {
+                      await PostTags.save({ post_id: post.id, tag_id: existing_tag.id });
+                      postTags.push(existing_tag.name);
+                  } else {
+                      const new_tag = await Tags.save({ name: tag.toLowerCase() });
+                      await PostTags.save({ post_id: post.id, tag_id: new_tag.id });
+                      postTags.push(new_tag.name);
+                  }
+              }
+          }
+  
+          // Return the post with tags included
+          const postWithTags = { ...post, tags: postTags };
+  
+          return res.status(201).json({
+              message: 'Post successfully created',
+              post: postWithTags
+          });
+      } catch (error) {
+          console.error('Error creating post:', error);
+          return res.status(500).json({
+              message: 'Internal server error while creating post'
+          });
+      }
+  },
+  
+    // async createPost(req, res) {
+    //     try {
+    //         const user_id = req.jwt_user.userId
+    //         const post_data = { ...req.body.post, user_id: user_id }
+    //         const post = await Post.save(post_data)
 
-            if (req.body.tags) {
-                const tags = await Tags.get_all()
-                const postTags = []
+    //         if (req.body.tags) {
+    //             const tags = await Tags.get_all()
+    //             const postTags = []
 
-                for (const tag of req.body.tags) {
-                    let existing_tag = tags.find(t => t.name.toLowerCase() === tag.toLowerCase())
-                    if (existing_tag) {
-                        await PostTags.save({ post_id: post.id, tag_id: existing_tag.id })
-                        postTags.push(existing_tag.name)
-                    } else {
-                        const new_tag = await Tags.save({ name: tag.toLowerCase() })
-                        await PostTags.save({ post_id: post.id, tag_id: new_tag.id })
-                        postTags.push(new_tag.name)
-                    }
-                }
+    //             for (const tag of req.body.tags) {
+    //                 let existing_tag = tags.find(t => t.name.toLowerCase() === tag.toLowerCase())
+    //                 if (existing_tag) {
+    //                     await PostTags.save({ post_id: post.id, tag_id: existing_tag.id })
+    //                     postTags.push(existing_tag.name)
+    //                 } else {
+    //                     const new_tag = await Tags.save({ name: tag.toLowerCase() })
+    //                     await PostTags.save({ post_id: post.id, tag_id: new_tag.id })
+    //                     postTags.push(new_tag.name)
+    //                 }
+    //             }
 
-                return res.status(201).json({
-                    message: 'Post successfully created with tags',
-                    post: post,
-                    tags: postTags
-                })
-            }
+    //             return res.status(201).json({
+    //                 message: 'Post successfully created with tags',
+    //                 post: post,
+    //                 tags: postTags
+    //             })
+    //         }
 
-            return res.status(201).json({
-                message: 'Post successfully created',
-                post: post
-            })
-        } catch (error) {
-            console.error('Error creating post:', error)
-            return res.status(500).json({
-                message: 'Internal server error while creating post'
-            })
-        }
-    },
+    //         return res.status(201).json({
+    //             message: 'Post successfully created',
+    //             post: post
+    //         })
+    //     } catch (error) {
+    //         console.error('Error creating post:', error)
+    //         return res.status(500).json({
+    //             message: 'Internal server error while creating post'
+    //         })
+    //     }
+    // },
 
     async getOnePost(req, res) {
         try {
