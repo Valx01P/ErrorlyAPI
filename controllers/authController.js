@@ -407,7 +407,7 @@ const authController = {
             if (!primaryEmail) {
                 console.error("No primary email found")
                 // redirect to frontend error page
-                return res.redirect('https://errorly-frontend-9vvvt6ip9-pablo-valdes-projects.vercel.app/auth/github/error')
+                return res.redirect('https://errorly-frontend.vercel.app/auth/github/error')
             }
     
             // find or create user
@@ -440,12 +440,12 @@ const authController = {
             })
     
             // redirect to frontend success page with access token in query parameter
-            return res.redirect(`https://errorly-frontend-9vvvt6ip9-pablo-valdes-projects.vercel.app/auth/github/success?access_token=${tokens.accessToken}`)
+            return res.redirect(`https://errorly-frontend.vercel.app/auth/github/success?access_token=${tokens.accessToken}`)
         
         } catch (error) {
             console.error('GitHub auth error:', error)
             // redirect to frontend error page
-            return res.redirect('https://errorly-frontend-9vvvt6ip9-pablo-valdes-projects.vercel.app/auth/github/error')
+            return res.redirect('https://errorly-frontend.vercel.app/auth/github/error')
         }
     }
 }
